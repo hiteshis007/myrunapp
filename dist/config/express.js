@@ -78,7 +78,10 @@ class Express {
             //   res.locals.user = req.session.user;
             //   next();
             // } else res.redirect("/login");
-            next();
+            if (pathname == "/")
+                res.redirect("/home");
+            else
+                next();
         });
     }
 }

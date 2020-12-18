@@ -1,0 +1,192 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
+    <meta http-equiv='X-UA-Compatible' content='IE=edge'>
+    <meta name='viewport' content='width=device-width, initial-scale=1'>
+
+    <title>Update</title>
+
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/semantic-ui@2.4.2/dist/semantic.min.css"/>
+    <script src="https://code.jquery.com/jquery-3.1.1.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/semantic-ui@2.4.2/dist/semantic.min.js"></script>
+
+    <link rel="stylesheet" href="/css/menu.css"/>
+    <script src="/js/menu.js"></script>
+
+    <style type="text/css">
+
+      .ui.statistic>.value, .ui.statistics .statistic>.value {
+          font-size: 2rem!important;
+      }
+      
+      
+    </style>
+
+    <script>
+      $(document).ready(function () {
+        
+        $('form button').click(function (e) { 
+            $('.ui.dimmer').dimmer('show');
+        });   
+
+        //biggest_ride_distance 
+        //recent_run_totals ytd_run_totals all_run_totals
+        //recent_swim_totals ytd_swim_totals all_swim_totals
+        //recent_ride_totals ytd_ride_totals all_ride_totals
+
+        if(localStorage.getItem("athlete") != null){
+          let athlete = JSON.parse(localStorage.getItem("athlete"));
+
+          $('#friends').children('.statistic').eq(0).find('.value').html(athlete.friend_count);
+          $('#friends').children('.statistic').eq(1).find('.value').html(athlete.mutual_friend_count);
+
+          $('#social').children('.statistic').eq(0).find('.value').html(athlete.follower==null?0:athlete.follower);
+          $('#social').children('.statistic').eq(1).find('.value').html(athlete.follower_count);
+        }
+
+        if(localStorage.getItem("athlete") != null){
+          let stats = JSON.parse(localStorage.getItem("stats"));
+
+          $('#biggest').children('.statistic').eq(0).find('.value').html(stats.biggest_ride_distance || 0);
+          $('#biggest').children('.statistic').eq(1).find('.value').html(stats.biggest_climb_elevation_gain || 0);
+
+          $('#run').children('.statistic').eq(0).find('.value').html(cal(stats.recent_run_totals.distance || 0));
+          $('#run').children('.statistic').eq(1).find('.value').html(cal(stats.ytd_run_totals.distance || 0));
+          $('#run').children('.statistic').eq(2).find('.value').html(cal(stats.all_run_totals.distance || 0));
+
+          $('#swim').children('.statistic').eq(0).find('.value').html(cal(stats.recent_swim_totals.distance || 0));
+          $('#swim').children('.statistic').eq(1).find('.value').html(cal(stats.ytd_swim_totals.distance || 0));
+          $('#swim').children('.statistic').eq(2).find('.value').html(cal(stats.all_swim_totals.distance || 0));
+
+          $('#ride').children('.statistic').eq(0).find('.value').html(cal(stats.recent_ride_totals.distance || 0));
+          $('#ride').children('.statistic').eq(1).find('.value').html(cal(stats.ytd_ride_totals.distance || 0));
+          $('#ride').children('.statistic').eq(2).find('.value').html(cal(stats.all_ride_totals.distance || 0));
+        }
+
+        function cal(value) {
+          let v = 0;
+          if(value!=0){
+            v= value/1609;
+            v = v.toFixed(2);
+          }
+          return v;
+        }
+        
+
+      });
+    </script>
+  </head>
+  <body class="pushable">
+
+    <%- include('user_header', {selected: 'stats', title:'STATS'}); %>
+
+    <div class="pusher" style="padding: 10px!important;">
+      
+      <h3>Friends</h3>
+      <div class="ui raised segment" >
+        <div id="friends" class="ui two statistics">
+          <div class="statistic">
+            <div class="value">0</div>
+            <div class="label">Friend</div>
+          </div>
+          <div class="statistic">
+            <div class="value">0</div>
+            <div class="label">Mutual Friend</div>
+          </div>
+        </div>
+      </div>
+
+      <h3>Social</h3>
+      <div class="ui raised segment">
+        <div id="social" class="ui two statistics">
+          <div class="statistic">
+            <div class="value">0</div>
+            <div class="label">Follower</div>
+          </div>
+          <div class="statistic">
+            <div class="value">0</div>
+            <div class="label">Following</div>
+          </div>
+        </div>
+      </div>
+
+      <h3>Biggest</h3> 
+      <div class="ui raised segment">
+        <div id="biggest" class="ui two statistics">
+          <div class="statistic">
+            <div class="value">0</div>
+            <div class="label">Ride distance</div>
+          </div>
+          <div class="statistic">
+            <div class="value">0</div>
+            <div class="label">Climb elevation</div>
+          </div>
+        </div>
+      </div>
+
+      <h3>Run</h3> 
+      <div class="ui raised segment">
+        <div id="run" class="ui three statistics">
+          <div class="statistic">
+            <div class="value">0</div>
+            <div class="label">Recent</div>
+          </div>
+          <div class="statistic">
+            <div class="value">0</div>
+            <div class="label">Yesterday</div>
+          </div>
+          <div class="statistic">
+            <div class="value">0</div>
+            <div class="label">All</div>
+          </div>
+        </div>
+      </div>
+
+      <h3>Swim</h3> 
+      <div class="ui raised segment">
+        <div id="swim" class="ui three statistics">
+          <div class="statistic">
+            <div class="value">0</div>
+            <div class="label">Recent</div>
+          </div>
+          <div class="statistic">
+            <div class="value">0</div>
+            <div class="label">Yesterday</div>
+          </div>
+          <div class="statistic">
+            <div class="value">0</div>
+            <div class="label">All</div>
+          </div>
+        </div>
+      </div>
+
+      <h3>Ride</h3>   
+      <div class="ui raised segment">
+        <div id="ride" class="ui three statistics">
+          <div class="statistic">
+            <div class="value">0</div>
+            <div class="label">Recent</div>
+          </div>
+          <div class="statistic">
+            <div class="value">0</div>
+            <div class="label">Yesterday</div>
+          </div>
+          <div class="statistic">
+            <div class="value">0</div>
+            <div class="label">All</div>
+          </div>
+        </div>
+      </div>
+
+      
+          
+    </div>
+
+    <div class="ui  inverted dimmer">
+      <!-- active -->
+      <div class="ui text loader">Loading</div>
+    </div>
+  
+  </body>
+</html>

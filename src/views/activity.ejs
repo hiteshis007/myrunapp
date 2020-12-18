@@ -1,0 +1,98 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
+    <meta http-equiv='X-UA-Compatible' content='IE=edge'>
+    <meta name='viewport' content='width=device-width, initial-scale=1'>
+
+    <title>Activity</title>
+
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/semantic-ui@2.4.2/dist/semantic.min.css"/>
+    <script src="https://code.jquery.com/jquery-3.1.1.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/semantic-ui@2.4.2/dist/semantic.min.js"></script>
+
+    <link rel="stylesheet" href="/css/menu.css"/>
+    <script src="/js/menu.js"></script>
+
+    <style type="text/css">
+
+      .card{
+        width:auto !important;
+        box-shadow: 0px 0px 8px rgba(0, 0, 0, 0.5) !important;
+      }
+
+      .cards{
+        margin:auto !important
+      }
+      
+      
+      
+    </style>
+
+    <script>
+      $(document).ready(function () {
+        
+        
+       
+        if(localStorage.getItem("activity") != null){
+          $('.ui.dimmer').dimmer('show');
+          let activity = JSON.parse(localStorage.getItem("activity"));
+          $.each(activity, function (index, value) { 
+             console.log(index);
+             console.log(value);
+             card(index, value);
+             if(index+1==activity.length) $('.ui.dimmer').dimmer('hide');
+          });
+
+        }
+
+
+        function card(index, card) {
+          let c = '<div class="card">'+
+          '<div class="image"><img src="/r'+(index+1)+'.jpg"></div>'+
+          '<div class="content">'+
+            '<div class="header">'+card.name+'</div>'+
+            '<div class="meta"><a>'+card.distance+' steps</a></div>'+
+            '<div class="meta"><a>'+card.type+'</a></div>'+
+            '<div class="description">Moving time '+card.moving_time+' sec</div>'+
+            '<div class="description">Elapsed time '+card.elapsed_time+' sec</div>'+
+          '</div>'+
+          '<div class="extra content">'+
+            '<span><i class="shield icon"></i>'+card.achievement_count+' Achievement</span>'+
+           '</div>'+
+           '<div class="extra content">'+
+            '<span class="right floated">Joined in '+card.start_date+'</span>'+
+            '</div>'+
+          '<div class="extra content">'+
+            '<span class="right floated"><i class="users icon"></i>'+card.athlete_count+' Athletes Joined</span>'+
+            '<span><i class="user icon"></i>'+card.visibility+' visibility</span>'+
+          '</div>'+
+          '</div>';
+
+          $('.cards').append(c);
+
+        }
+        
+
+      });
+    </script>
+  </head>
+  <body class="pushable">
+
+    <%- include('user_header', {selected: 'activity', title:'ACTIVITY'}); %>
+
+    <div class="pusher">
+      <div class="ui centered cards">
+        
+        
+        
+      </div>
+    </div>
+
+    <div class="ui  inverted dimmer">
+      <!-- active -->
+      <div class="ui text loader">Loading</div>
+    </div>
+  
+  </body>
+</html>

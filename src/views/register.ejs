@@ -1,0 +1,190 @@
+<!DOCTYPE html>
+<!-- saved from url=(0046)https://semantic-ui.com/examples/homepage.html -->
+<html>
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
+    <meta http-equiv='X-UA-Compatible' content='IE=edge'>
+    <meta name='viewport' content='width=device-width, initial-scale=1'>
+
+    <title>Register</title>
+
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/semantic-ui@2.4.2/dist/semantic.min.css"/>
+    <script src="https://code.jquery.com/jquery-3.1.1.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/semantic-ui@2.4.2/dist/semantic.min.js"></script>
+    <script src="	https://unpkg.com/ejs@3.1.3/ejs.min.js"></script> 
+
+    <link rel="stylesheet" href="/css/menu.css"/>
+    <script src="/js/menu.js"></script>
+
+    <style type="text/css">
+
+      .row{padding-bottom: 0px !important;}
+
+      .cstm-img{
+          box-shadow: 0 14px 28px rgba(0,0,0,0.25), 0 10px 10px rgba(0,0,0,0.22);
+          width: 100px;
+          height: 100px;
+          border: 5px solid white;
+          border-radius: 100px;
+      }
+
+
+    </style>
+
+  </head>
+  <body class="pushable">
+
+    <%- include('home_header', {title: 'REGISTER'}); %>
+
+    <div class="pusher">
+
+      <div class="ui width center aligned grid" style="margin: 0px;">
+        <div class="row">
+          <div class="column">
+            <div class="field">
+              <input type="file" name="profilePic" id='file' style="display: none;" onchange="document.getElementById('img').src = window.URL.createObjectURL(this.files[0])" multiple>
+              <label for="file" style="text-align: center;">
+                  <img class="cstm-img" id='img' src="/camera.png" onerror="this.src='/camera.png'" >
+              </label>
+            </div>
+          </div>
+        </div>
+        <div class="row">
+          <div class="column">
+            <div class="form__group field">
+              <input type="input" class="form__field" placeholder="First Name" name="fname" id='fname' required />
+              <label for="fname" class="form__label">First Name</label>
+            </div>
+          </div>
+        </div>
+        <div class="row">
+          <div class="column">
+            <div class="form__group field">
+              <input type="input" class="form__field" placeholder="last Name" name="lname" id='lname' required />
+              <label for="lname" class="form__label">Last Name</label>
+            </div>
+          </div>
+        </div>
+        <div class="row">
+          <div class="column">
+            <div class="form__group field">
+              <input type="input" class="form__field" placeholder="Email" name="email" id='email' required />
+              <label for="email" class="form__label">Email</label>
+            </div>
+          </div>
+        </div>
+        <div class="row">
+          <div class="column">
+            <div class="form__group field">
+              <input type="input" class="form__field" placeholder="Mobile" name="mobile" id='mobile' required />
+              <label for="mobile" class="form__label">Mobile</label>
+            </div>
+          </div>
+        </div>
+        <div class="row">
+          <div class="column">
+            <div class="form__group field">
+              <input type="input" class="form__field" placeholder="Password" name="password" id='password' required />
+              <label for="password" class="form__label">Password</label>
+            </div>
+          </div>
+        </div>
+        <div class="row" style="padding-top: 25px;padding-bottom: 10px!important;">
+          <div class="column">
+            <a class="ui button" href="/register" style="width: 100%;font-size: 20px;border-radius: 30px;color: #fff;background: #2296f3;">SIGN UP</a>
+          </div>
+        </div>
+      </div>
+      
+    </div>
+
+    <div class="ui  inverted dimmer">
+      <!-- active -->
+      <div class="ui text loader">Loading</div>
+    </div>
+
+    <div class="ui modal">
+      <div class="content">
+        <div class="ui indicating progress">
+            <div class="bar"></div>
+            <div class="label">0% uploading...</div>
+        </div>
+      </div>
+      <div class="actions">
+        <div class="ui cancel red button">Close</div>
+      </div>
+    </div>
+
+
+    <script>
+      $( document ).ready(function() {
+
+          $("input, select").change(function(){
+              $(this).closest('.field').find('.label').remove();
+              $(this).closest('.field').removeClass('error');
+          });
+
+          $('form button').click(function (e) { 
+            //$('.ui.dimmer').dimmer('show');
+        });   
+
+        $(document).on("submit", "form", function(e){
+          e.preventDefault();
+          console.log('Upload calling!!!');
+          $.ajax({
+            url: '/register',
+            method: 'post',
+            data: new FormData(this),
+            processData: false,
+            contentType: false,
+            xhr: function () {
+              var xhr = new XMLHttpRequest();
+              $('.ui.modal').modal('show');
+
+              // Add progress event listener to the upload.
+              xhr.upload.addEventListener('progress', function (event) {
+                  if (event.lengthComputable) {
+                    var percent = (event.loaded / event.total) * 100;
+                    console.log(parseInt(percent));
+                    $('.ui.modal .bar').width(parseInt(percent) + '%');
+                    $('.ui.modal .label').html(parseInt(percent) + '% uploading registration...');
+                  }
+              });
+
+              return xhr;
+            }
+          }).done(function (data){
+              //console.log(JSON.stringify(data));
+              $('.ui.modal .label').html('Files uploaded successfully ...');
+              $('.ui.modal').modal('hide');
+
+              if(data.statusCode == 400){
+                $.each( data.error, function( field, eMsg ) {
+                  //console.log( field + ": " + eMsg );
+                  $( "input[name='"+field+"']" ).closest('.field').find('.label').remove()
+                  $( "input[name='"+field+"']" ).closest('.field').append('<div class="ui pointing red basic label">'+eMsg+'</div>');
+                });
+              }
+              if(data.statusCode == 500){
+                $('.error').html("<div class='ui negative message segment'><div class='header'>"+data.error+"</div></div>");
+              }
+
+              if(data.statusCode == 200){
+                window.location.href='/login';
+              }
+            
+          }).fail(function (xhr, status) {
+                //alert(status);
+                $('.ui.modal').modal('hide');
+                $('.error').html("<div class='ui negative message segment'><div class='header'>"+status+"</div></div>");
+
+          });
+        });  
+
+            
+          
+      });
+    </script>
+
+  </body>
+</html>

@@ -1,0 +1,65 @@
+<!DOCTYPE html>
+<!-- saved from url=(0046)https://semantic-ui.com/examples/homepage.html -->
+<html>
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
+    <meta http-equiv='X-UA-Compatible' content='IE=edge'>
+    <meta name='viewport' content='width=device-width, initial-scale=1'>
+
+    <title>Homepage</title>
+
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/semantic-ui@2.4.2/dist/semantic.min.css"/>
+    <script src="https://code.jquery.com/jquery-3.1.1.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/semantic-ui@2.4.2/dist/semantic.min.js"></script>
+
+    <link rel="stylesheet" href="/css/menu.css"/>
+    <script src="/js/menu.js"></script>
+
+    <style type="text/css">
+
+      img{
+        width: 90% !important;
+        margin-top: 235px;
+      }
+
+      .pushable{
+          background-repeat: no-repeat;
+          background-size: 100% 100%;
+          background-image: url(../homebg.png) !important;
+          background-color: #00b0ea;
+      }
+      
+      
+    </style>
+    <script>
+      $(document).ready(function () {
+
+        localStorage.removeItem("token");
+        localStorage.removeItem("activity");
+        localStorage.removeItem("athlete");
+        localStorage.removeItem("stats");
+
+      });
+    </script>
+
+  </head>
+  <body style="height: 100% !important;">
+  <div class="pushable">
+    
+    <img class="ui centered image" src="/logo_name.png">
+
+    <div class=" " style="background: transparent;width: 100%;position: fixed;bottom: 50px;">
+      <div class="ui centered grid">
+        <div class="ui" style="width: 100%;margin-bottom: 30px;">
+          <a class="ui inverted button" href="/register" style="width: 90%;font-size: 20px;border-radius: 30px;">SIGN UP</a>
+        </div>
+        <div class="ui" style="font-size: 20px;color: white;font-weight: bold;">
+          <span>Already have an account ?</span>
+          <a href="/login" style="color: #e84f12;">LOG IN</a>
+        </div>
+      </div>
+    </div>
+  
+  </div>
+  </body>
+</html>

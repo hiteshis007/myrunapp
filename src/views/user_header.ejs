@@ -1,0 +1,46 @@
+<div class="ui fixed borderless main menu pointing" style="font-size: 20px;box-shadow: 0px 3px 5px rgba(0, 0, 0, 0.2);">
+  <a class="item" href="" style="padding: 0px;">
+    <img class="logo" src="../logo.png">
+  </a>
+  <div class="item"><%= locals.title %></div>
+  <div class="right menu">
+      <div class="ui dropdown item" style="padding: 12px 22px;">
+          <img class="ui avatar image" src="/camera.png">
+          <i class="dropdown icon" style="margin-left: 2px;"></i>
+          <div class="menu">
+            <a href="/profile" class="item <%= locals.selected=='profile'?'selected':'' %>"><i class="user outline icon"></i> Profile</a>
+            <a href="/activity" class="item <%= locals.selected=='activity'?'selected':'' %>"><i class="tasks icon"></i> Activity</a>
+            <a href="/stats" class="item <%= locals.selected=='stats'?'selected':'' %>"><i class="chart line icon"></i> Stats</a>
+            <a href="/sync" class="item <%= locals.selected=='sync'?'selected':'' %>"><i class="sync alternate icon"></i> Sync</a>
+            <a class="item logout_view_open"><i class="sign out icon"></i> Logout</a>
+          </div>
+      </div>
+  </div>
+
+  <div class="ui mini modal logout_model">
+    <div class="header">Logout</div>
+    <div class="content">
+      <p>Do you want to logout !!!</p>
+    </div>
+    <div class="actions">
+      <a class="ui logout primary button" href="/logout">Logout</a>
+      <div class="ui cancel red button">Cancel</div>
+    </div>
+  </div>
+</div>
+
+<script>
+  $( document ).ready(function() {
+
+    if(localStorage.getItem("athlete") != null){
+      let athlete = JSON.parse(localStorage.getItem("athlete"));
+      $('.dropdown .avatar').attr('src', athlete.profile);
+    }
+     
+      $('.dropdown')
+      .dropdown({
+          maxSelections: 3
+      });
+
+  });
+</script>

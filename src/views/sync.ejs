@@ -1,0 +1,200 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
+    <meta http-equiv='X-UA-Compatible' content='IE=edge'>
+    <meta name='viewport' content='width=device-width, initial-scale=1'>
+
+    <title>Update</title>
+
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/semantic-ui@2.4.2/dist/semantic.min.css"/>
+    <script src="https://code.jquery.com/jquery-3.1.1.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/semantic-ui@2.4.2/dist/semantic.min.js"></script>
+
+    <link rel="stylesheet" href="/css/menu.css"/>
+    <script src="/js/menu.js"></script>
+
+    <style type="text/css">
+
+      
+      
+      
+    </style>
+
+    <script>
+      $(document).ready(function () {
+
+              
+        $('button').click(function (e) { 
+            $('.ui.dimmer').dimmer('show');
+        });   
+
+        
+        if(localStorage.getItem("token") != null){
+          setSyncDate();
+        }
+
+        function setSyncDate() {
+          let tkn = JSON.parse(localStorage.getItem("token"));
+          let msg = '<div class="ui info message">'+
+          '<i class="close icon"></i>'+
+          '<div class="header">We synched at <b>'+tkn.created_at+'</b></div>'+
+          '</div>';
+          $('.date_div').html(msg);
+          
+        }
+        
+       
+        
+        var urlParams = new URLSearchParams(window.location.search);
+        if(urlParams.has('code')){
+          $('.code').html(urlParams.get('code'));
+          $('.ui.dimmer').dimmer('show');
+          $('.text.loader').html("Getting token from Strava app....");
+          getToken({code:urlParams.get('code'), grant_type:'authorization_code'});
+        }
+
+        function getToken(obj2) {
+          console.log('Getting token!!!');
+          let obj = { client_id: 58398, client_secret : '1b8d01ed514651ab276e7d5f420d517004674142'};
+          $.extend( obj, obj2 );
+          //console.log(JSON.stringify(obj));
+          $.ajax({
+            url: 'https://www.strava.com/oauth/token',
+            method: 'post',
+            data: jQuery.param(obj) ,
+            contentType: 'application/x-www-form-urlencoded;',
+          }).done(function (data){
+            data.created_at = new Date();
+            //console.log(JSON.stringify(data));
+            localStorage.setItem("token", JSON.stringify(data));
+            getActivity();
+           
+          }).fail(function (xhr, status) {
+            console.log(status);
+          });
+        }
+
+        function getActivity() {
+          console.log('Getting Activity!!!');
+          let tkn = JSON.parse(localStorage.getItem("token"));
+          $('.text.loader').html("Getting logged in athlete activities from Strava app....");
+          //console.log(JSON.stringify(obj));
+          $.ajax({
+            url: 'https://www.strava.com/api/v3/athlete/activities',
+            method: 'get',
+            headers: { 'Authorization': 'Bearer '+tkn.access_token },
+            contentType: 'application/x-www-form-urlencoded;',
+          }).done(function (data){
+            //console.log(JSON.stringify(data));
+            localStorage.setItem("activity", JSON.stringify(data));
+            getProfile();
+        
+          }).fail(function (xhr, status) {
+            console.log(status);
+          });
+        }
+
+        function getProfile() {
+          console.log('Getting Profile!!!');
+          let tkn = JSON.parse(localStorage.getItem("token"));
+          $('.text.loader').html("Getting logged in athlete from Strava app....");
+          //console.log(JSON.stringify(obj));
+          $.ajax({
+            url: 'https://www.strava.com/api/v3/athlete',
+            method: 'get',
+            headers: { 'Authorization': 'Bearer '+tkn.access_token },
+            contentType: 'application/x-www-form-urlencoded;',
+          }).done(function (data){
+            //console.log(JSON.stringify(data));
+            localStorage.setItem("athlete", JSON.stringify(data));
+            getStats();
+             
+          }).fail(function (xhr, status) {
+            console.log(status);
+          });
+        }
+
+        function getStats() {
+          console.log('Getting stats!!!');
+          let tkn = JSON.parse(localStorage.getItem("token"));
+          let atlet = JSON.parse(localStorage.getItem("athlete"));
+          
+          $('.text.loader').html("Getting logged in athlete stats from Strava app....");
+          //console.log(JSON.stringify(obj));
+          $.ajax({
+            url: 'https://www.strava.com/api/v3/athletes/'+atlet.id+'/stats',
+            method: 'get',
+            headers: { 'Authorization': 'Bearer '+tkn.access_token },
+            contentType: 'application/x-www-form-urlencoded;',
+          }).done(function (data){
+            //console.log(JSON.stringify(data));
+            localStorage.setItem("stats", JSON.stringify(data));
+            $('.ui.dimmer').dimmer('hide');
+            setSyncDate();
+            //localStorage.removeItem("token");
+            
+          }).fail(function (xhr, status) {
+            console.log(status);
+          });
+        }
+
+
+
+        $('#stravaAuthorizeBtn').click(function (e) { 
+          e.preventDefault();
+          if(localStorage.getItem("token") != null){
+            //console.log(localStorage.getItem("token"));
+            $('.text.loader').html("Getting token from Strava app....");
+            let token = JSON.parse(localStorage.getItem("token"));
+            getToken({refresh_token:token.refresh_token, grant_type:'refresh_token'});
+            
+            
+          }else authorize();
+        });
+
+        function authorize() {
+          console.log('authorize called ...');
+          $('.text.loader').html("Authorizing from Strava app....");
+          let url = "http://www.strava.com/oauth/authorize?client_id=58398&response_type=code&redirect_uri=http://127.0.0.1:4001/sync&approval_prompt=force&scope=read_all,profile:read_all,activity:read_all";
+          window.open(url, '_self', true);
+        }
+
+      });
+    </script>
+  </head>
+  <body class="pushable">
+
+    <%- include('user_header', {selected: 'sync', title:'SYNC'}); %>
+
+    <div class="pusher">
+
+      <div style="padding: 10px;;">
+
+        <button id="stravaAuthorizeBtn" class="ui button" style="width: 100%;font-size: 20px;border-radius: 30px;color: #fff;background: #2296f3;margin: 20px 0 20px 0;">Strava</button>
+        
+        <div class="date_div"></div>
+
+        <div class="ui info message">
+          <i class="close icon"></i>
+          <div class="header">
+            Synching with Strava app
+          </div>
+          <ul class="list">
+            <li>Meanwhile we are providing support with strava app</li>
+            <li>We are authenticating by logging your strava app.</li>
+            <li>We will fetch only your profile and activity list</li>
+          </ul>
+        </div>
+
+      </div>
+       
+    </div>
+
+    <div class="ui inverted dimmer">
+      <!-- active -->
+      <div class="ui text loader">Loading</div>
+    </div>
+  
+  </body>
+</html>

@@ -156,7 +156,7 @@
         function authorize() {
           console.log('authorize called ...');
           $('.text.loader').html("Authorizing from Strava app....");
-          let url = "http://www.strava.com/oauth/authorize?client_id=58398&response_type=code&redirect_uri=http://127.0.0.1:4001/sync&approval_prompt=force&scope=read_all,profile:read_all,activity:read_all";
+          let url = "http://www.strava.com/oauth/authorize?client_id=58398&response_type=code&redirect_uri=https://myrn.herokuapp.com/sync&approval_prompt=force&scope=read_all,profile:read_all,activity:read_all";
           window.open(url, '_self', true);
         }
 

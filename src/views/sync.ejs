@@ -32,7 +32,7 @@
         
         if(localStorage.getItem("sttoken") != null){
           let tkn = JSON.parse(localStorage.getItem("sttoken"));
-          setSyncDate(tkn, 'date_div');
+          setSyncDate(tkn, 'strava_sync_div');
         }
         if(localStorage.getItem("sptoken") != null){
           let tkn = JSON.parse(localStorage.getItem("sptoken"));
@@ -40,7 +40,8 @@
         }
 
         function setSyncDate(tkn, idDiv) {
-          let msg = '<div class="ui info message" style="background-color: #fc4c02;margin-top: 1em;">'+
+          let clr = idDiv=='strava_sync_div' ? '#fc4c02':'#1ed760';
+          let msg = '<div class="ui info message" style="background-color:'+clr+' ;margin-top: 1em;">'+
           '<i class="close icon"></i>'+
           '<div class="header">We synched at <b>'+tkn.created_at+'</b></div>'+
           '</div>';
@@ -162,7 +163,7 @@
             //console.log(JSON.stringify(data));
             localStorage.setItem("ststats", JSON.stringify(data));
             $('.ui.dimmer').dimmer('hide');
-            setSyncDate(tkn, 'date_div');
+            setSyncDate(tkn, 'strava_sync_div');
             //localStorage.removeItem("token");
             
           }).fail(function (xhr, status) {
@@ -261,7 +262,7 @@
             <img style="height: 40px;" src="/strava.png">
           </button>
         
-          <div class="date_div"></div>
+          <div class="strava_sync_div"></div>
 
           <div class="ui info message" style="background-color: #fc4c02;color: #ffffff;">
             <i class="close icon"></i>

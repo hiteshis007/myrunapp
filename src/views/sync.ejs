@@ -55,7 +55,7 @@
           if(urlParams.has('code')){
             //$('.ui.dimmer').dimmer('show');
             $('.text.loader').html("Getting token from Strava app....");
-            //getToken({code:urlParams.get('code'), grant_type:'authorization_code'});
+            getSTToken({code:urlParams.get('code'), grant_type:'authorization_code'});
           }
         }else if(urlParams.get('type')=='spotify'){
           if(urlParams.has('code')){

@@ -36,7 +36,7 @@
         //recent_ride_totals ytd_ride_totals all_ride_totals
 
         if(localStorage.getItem("athlete") != null){
-          let athlete = JSON.parse(localStorage.getItem("athlete"));
+          let athlete = JSON.parse(localStorage.getItem("stathlete"));
 
           $('#friends').children('.statistic').eq(0).find('.value').html(athlete.friend_count);
           $('#friends').children('.statistic').eq(1).find('.value').html(athlete.mutual_friend_count);
@@ -46,7 +46,7 @@
         }
 
         if(localStorage.getItem("athlete") != null){
-          let stats = JSON.parse(localStorage.getItem("stats"));
+          let stats = JSON.parse(localStorage.getItem("ststats"));
 
           $('#biggest').children('.statistic').eq(0).find('.value').html(stats.biggest_ride_distance || 0);
           $('#biggest').children('.statistic').eq(1).find('.value').html(stats.biggest_climb_elevation_gain || 0);

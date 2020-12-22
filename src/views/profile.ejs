@@ -24,8 +24,8 @@
     <script>
       $(document).ready(function () {
 
-        if(localStorage.getItem("athlete") != null){
-          let athlete = JSON.parse(localStorage.getItem("athlete"));
+        if(localStorage.getItem("stathlete") != null){
+          let athlete = JSON.parse(localStorage.getItem("stathlete"));
         
           let p ='<div class="ui card" style="width: auto !important;">'+
           '<div class="image">'+
@@ -40,9 +40,9 @@
             '<span class="right floated">Joined in '+athlete.created_at+'</span>'+
             '<span><i class="user icon"></i>Friends '+athlete.friend_count+'</span>'+
           '</div>'+
-        '</div>';
+          '</div>';
 
-        $('.pusher').append(p);
+          $('.pusher').append(p);
 
         }
         

@@ -30,32 +30,63 @@
         });   
 
         
-        if(localStorage.getItem("token") != null){
-          setSyncDate();
+        if(localStorage.getItem("sttoken") != null){
+          let tkn = JSON.parse(localStorage.getItem("sttoken"));
+          setSyncDate(tkn, 'date_div');
+        }
+        if(localStorage.getItem("sptoken") != null){
+          let tkn = JSON.parse(localStorage.getItem("sptoken"));
+          setSyncDate(tkn, 'spotify_sync_div');
         }
 
-        function setSyncDate() {
-          let tkn = JSON.parse(localStorage.getItem("token"));
-          let msg = '<div class="ui info message">'+
+        function setSyncDate(tkn, idDiv) {
+          let msg = '<div class="ui info message" style="background-color: #fc4c02;margin-top: 1em;">'+
           '<i class="close icon"></i>'+
           '<div class="header">We synched at <b>'+tkn.created_at+'</b></div>'+
           '</div>';
-          $('.date_div').html(msg);
+          $('.'+idDiv+'').html(msg);
           
         }
         
        
         
         var urlParams = new URLSearchParams(window.location.search);
-        if(urlParams.has('code')){
-          $('.code').html(urlParams.get('code'));
-          $('.ui.dimmer').dimmer('show');
-          $('.text.loader').html("Getting token from Strava app....");
-          getToken({code:urlParams.get('code'), grant_type:'authorization_code'});
+        if(urlParams.get('type')=='strava'){
+          if(urlParams.has('code')){
+            //$('.ui.dimmer').dimmer('show');
+            $('.text.loader').html("Getting token from Strava app....");
+            //getToken({code:urlParams.get('code'), grant_type:'authorization_code'});
+          }
+        }else if(urlParams.get('type')=='spotify'){
+          if(urlParams.has('code')){
+            //$('.ui.dimmer').dimmer('show');
+            $('.text.loader').html("Getting token from Spotify app....");
+            //console.log('spotify token is :', urlParams.get('code'));
+            getSPToken({code:urlParams.get('code'), grant_type:'authorization_code'});
+          }
         }
 
-        function getToken(obj2) {
-          console.log('Getting token!!!');
+        
+
+        $('#stravaAuthorizeBtn').click(function (e) { 
+          e.preventDefault();
+          if(localStorage.getItem("sttoken") != null){
+            //console.log(localStorage.getItem("token"));
+            $('.text.loader').html("Getting token from Strava app....");
+            let token = JSON.parse(localStorage.getItem("sttoken"));
+            getSTToken({refresh_token:token.refresh_token, grant_type:'refresh_token'});
+          }else authorizeST();
+        });
+
+        function authorizeST() {
+          //console.log('strava authorize called ...');
+          $('.text.loader').html("Authorizing from Strava app....");
+          let url = "http://www.strava.com/oauth/authorize?client_id=58398&response_type=code&redirect_uri=https://myrn.herokuapp.com/sync?type=strava&approval_prompt=force&scope=read_all,profile:read_all,activity:read_all";
+          window.open(url, '_self', true);
+        }
+
+        function getSTToken(obj2) {
+          console.log('Getting strava token!!!');
           let obj = { client_id: 58398, client_secret : '1b8d01ed514651ab276e7d5f420d517004674142'};
           $.extend( obj, obj2 );
           //console.log(JSON.stringify(obj));
@@ -67,17 +98,17 @@
           }).done(function (data){
             data.created_at = new Date();
             //console.log(JSON.stringify(data));
-            localStorage.setItem("token", JSON.stringify(data));
-            getActivity();
+            localStorage.setItem("sttoken", JSON.stringify(data));
+            getSTActivity();
            
           }).fail(function (xhr, status) {
             console.log(status);
           });
         }
 
-        function getActivity() {
-          console.log('Getting Activity!!!');
-          let tkn = JSON.parse(localStorage.getItem("token"));
+        function getSTActivity() {
+          console.log('Getting strava Activity!!!');
+          let tkn = JSON.parse(localStorage.getItem("sttoken"));
           $('.text.loader').html("Getting logged in athlete activities from Strava app....");
           //console.log(JSON.stringify(obj));
           $.ajax({
@@ -87,17 +118,17 @@
             contentType: 'application/x-www-form-urlencoded;',
           }).done(function (data){
             //console.log(JSON.stringify(data));
-            localStorage.setItem("activity", JSON.stringify(data));
-            getProfile();
+            localStorage.setItem("stactivity", JSON.stringify(data));
+            getSTProfile();
         
           }).fail(function (xhr, status) {
             console.log(status);
           });
         }
 
-        function getProfile() {
-          console.log('Getting Profile!!!');
-          let tkn = JSON.parse(localStorage.getItem("token"));
+        function getSTProfile() {
+          console.log('Getting strava Profile!!!');
+          let tkn = JSON.parse(localStorage.getItem("sttoken"));
           $('.text.loader').html("Getting logged in athlete from Strava app....");
           //console.log(JSON.stringify(obj));
           $.ajax({
@@ -107,18 +138,18 @@
             contentType: 'application/x-www-form-urlencoded;',
           }).done(function (data){
             //console.log(JSON.stringify(data));
-            localStorage.setItem("athlete", JSON.stringify(data));
-            getStats();
+            localStorage.setItem("stathlete", JSON.stringify(data));
+            getSTStats();
              
           }).fail(function (xhr, status) {
             console.log(status);
           });
         }
 
-        function getStats() {
-          console.log('Getting stats!!!');
-          let tkn = JSON.parse(localStorage.getItem("token"));
-          let atlet = JSON.parse(localStorage.getItem("athlete"));
+        function getSTStats() {
+          console.log('Getting strava stats!!!');
+          let tkn = JSON.parse(localStorage.getItem("sttoken"));
+          let atlet = JSON.parse(localStorage.getItem("stathlete"));
           
           $('.text.loader').html("Getting logged in athlete stats from Strava app....");
           //console.log(JSON.stringify(obj));
@@ -129,9 +160,9 @@
             contentType: 'application/x-www-form-urlencoded;',
           }).done(function (data){
             //console.log(JSON.stringify(data));
-            localStorage.setItem("stats", JSON.stringify(data));
+            localStorage.setItem("ststats", JSON.stringify(data));
             $('.ui.dimmer').dimmer('hide');
-            setSyncDate();
+            setSyncDate(tkn, 'date_div');
             //localStorage.removeItem("token");
             
           }).fail(function (xhr, status) {
@@ -141,24 +172,77 @@
 
 
 
-        $('#stravaAuthorizeBtn').click(function (e) { 
+
+        $('#spotifyAuthorizeBtn').click(function (e) { 
           e.preventDefault();
-          if(localStorage.getItem("token") != null){
-            //console.log(localStorage.getItem("token"));
-            $('.text.loader').html("Getting token from Strava app....");
-            let token = JSON.parse(localStorage.getItem("token"));
-            getToken({refresh_token:token.refresh_token, grant_type:'refresh_token'});
-            
-            
-          }else authorize();
+          console.log("spotifyAuthorizeBtn clicked ");
+          if(localStorage.getItem("sptoken") != null){
+            $('.text.loader').html("Getting refresh token from Spotify app....");
+            let token = JSON.parse(localStorage.getItem("sptoken"));
+            getSPToken({refresh_token:token.refresh_token, grant_type:'refresh_token'});
+          }else authorizeSP();
         });
 
-        function authorize() {
-          console.log('authorize called ...');
-          $('.text.loader').html("Authorizing from Strava app....");
-          let url = "http://www.strava.com/oauth/authorize?client_id=58398&response_type=code&redirect_uri=https://myrn.herokuapp.com/sync&approval_prompt=force&scope=read_all,profile:read_all,activity:read_all";
+        function authorizeSP() {
+          console.log('spotify authorize called ...');
+          $('.text.loader').html("Authorizing from Spotify app....");
+          let url = "https://accounts.spotify.com/authorize?client_id=03f7870c8b5e433e95b6cab9cdd89d88&response_type=code&redirect_uri=https://myrn.herokuapp.com/sync?type=spotify&scope=user-read-recently-played,user-library-read,playlist-read-private,user-follow-read,user-read-currently-playing,user-top-read";
           window.open(url, '_self', true);
         }
+
+        function getSPToken(obj2) {
+          console.log('Getting spotify token!!!');
+          let obj = { client_id: '03f7870c8b5e433e95b6cab9cdd89d88', client_secret : 'c1758e91ae284c4d9983fc0595023b73', redirect_uri:'https://myrn.herokuapp.com/sync?type=spotify'};
+          $.extend( obj, obj2 );
+          //console.log(JSON.stringify(obj));
+          $.ajax({
+            url: 'https://accounts.spotify.com/api/token',
+            method: 'POST',
+            data: jQuery.param(obj) ,
+            contentType: 'application/x-www-form-urlencoded;',
+          }).done(function (data){
+            data.created_at = new Date();
+            
+            if(! data.hasOwnProperty("refresh_token")){ 
+              let tkn = JSON.parse(localStorage.getItem("sptoken"));
+              data.refresh_token=tkn.refresh_token;
+            }
+
+            localStorage.setItem("sptoken", JSON.stringify(data));
+            //console.log(JSON.stringify(data));
+            
+            getSPPlaylists();
+          }).fail(function (xhr, status) {
+            console.log(xhr.responseText);
+          });
+        }
+
+        function getSPPlaylists() {
+          console.log('Getting spotify playlist!!!');
+          let tkn = JSON.parse(localStorage.getItem("sptoken"));
+          $('.text.loader').html("Getting spotify playlists from Spotify app....");
+          //console.log(JSON.stringify(obj));
+          $.ajax({
+            url: 'https://api.spotify.com/v1/me/playlists',
+            method: 'get',
+            headers: { 'Authorization': 'Bearer '+tkn.access_token },
+            contentType: 'application/json;',
+          }).done(function (data){
+            //console.log(JSON.stringify(data));
+            console.log('Playlist size are : ', data.items.length)
+            localStorage.setItem("spplaylists", JSON.stringify(data));
+            $('.ui.dimmer').dimmer('hide');
+            //window.location.href = '/music';
+            setSyncDate(tkn, 'spotify_sync_div');
+        
+          }).fail(function (xhr, status) {
+            console.log(xhr.responseText);
+            $('.ui.dimmer').dimmer('hide');
+          });
+        }
+
+
+       
 
       });
     </script>
@@ -171,22 +255,48 @@
 
       <div style="padding: 10px;;">
 
-        <button id="stravaAuthorizeBtn" class="ui button" style="width: 100%;font-size: 20px;border-radius: 30px;color: #fff;background: #2296f3;margin: 20px 0 20px 0;">Strava</button>
-        
-        <div class="date_div"></div>
+        <div class="ui segment">
 
-        <div class="ui info message">
-          <i class="close icon"></i>
-          <div class="header">
-            Synching with Strava app
+          <button id="stravaAuthorizeBtn" class="ui button" style="width: 100%;border-radius: 30px;padding: 5px 0px;">
+            <img style="height: 40px;" src="/strava.png">
+          </button>
+        
+          <div class="date_div"></div>
+
+          <div class="ui info message" style="background-color: #fc4c02;color: #ffffff;">
+            <i class="close icon"></i>
+            <div class="header">
+              Synching with Strava app
+            </div>
+            <ul class="list">
+              <li>We are authenticating by logging your strava app.</li>
+              <li>We will fetch only your profile and activity list</li>
+            </ul>
           </div>
-          <ul class="list">
-            <li>Meanwhile we are providing support with strava app</li>
-            <li>We are authenticating by logging your strava app.</li>
-            <li>We will fetch only your profile and activity list</li>
-          </ul>
+
         </div>
 
+        <div class="ui segment">
+
+          <button id="spotifyAuthorizeBtn" class="ui button" style="width: 100%;border-radius: 30px;padding: 5px 0px;">
+            <img style="height: 40px;" src="/spotify.png">
+          </button>
+        
+          <div class="spotify_sync_div"></div>
+
+          <div class="ui info message" style="background-color: #1ed760;color: #ffffff;">
+            <i class="close icon"></i>
+            <div class="header">
+              Synching with Spotify app
+            </div>
+            <ul class="list">
+              <li>We are authenticating by logging your spotify app.</li>
+              <li>We will show your recommendation</li>
+            </ul>
+          </div>
+
+        </div>
+        
       </div>
        
     </div>

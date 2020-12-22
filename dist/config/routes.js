@@ -23,6 +23,12 @@ class Routes {
         this.app.route('/sync').get((req, res) => {
             res.render('sync');
         });
+        this.app.route('/music').get((req, res) => {
+            res.render('music');
+        });
+        this.app.route('/playlistsongs').get((req, res) => {
+            res.render('playlistsongs');
+        });
     }
 }
 exports.default = Routes;

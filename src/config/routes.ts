@@ -26,6 +26,13 @@ export default class Routes {
         this.app.route('/sync').get((req:Request, res:Response)=>{
             res.render('sync');
         });
+        this.app.route('/music').get((req:Request, res:Response)=>{
+            res.render('music');
+        });
+
+        this.app.route('/playlistsongs').get((req:Request, res:Response)=>{
+            res.render('playlistsongs');
+        });
 
     }
 }

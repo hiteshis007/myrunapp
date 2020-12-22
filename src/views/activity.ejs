@@ -36,10 +36,10 @@
        
         if(localStorage.getItem("activity") != null){
           $('.ui.dimmer').dimmer('show');
-          let activity = JSON.parse(localStorage.getItem("activity"));
+          let activity = JSON.parse(localStorage.getItem("stactivity"));
           $.each(activity, function (index, value) { 
-             console.log(index);
-             console.log(value);
+             //console.log(index);
+             //console.log(value);
              card(index, value);
              if(index+1==activity.length) $('.ui.dimmer').dimmer('hide');
           });

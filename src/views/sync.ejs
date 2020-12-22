@@ -53,13 +53,13 @@
         var urlParams = new URLSearchParams(window.location.search);
         if(urlParams.get('type')=='strava'){
           if(urlParams.has('code')){
-            //$('.ui.dimmer').dimmer('show');
+            $('.ui.dimmer').dimmer('show');
             $('.text.loader').html("Getting token from Strava app....");
             getSTToken({code:urlParams.get('code'), grant_type:'authorization_code'});
           }
         }else if(urlParams.get('type')=='spotify'){
           if(urlParams.has('code')){
-            //$('.ui.dimmer').dimmer('show');
+            $('.ui.dimmer').dimmer('show');
             $('.text.loader').html("Getting token from Spotify app....");
             //console.log('spotify token is :', urlParams.get('code'));
             getSPToken({code:urlParams.get('code'), grant_type:'authorization_code'});

@@ -187,13 +187,17 @@
         function authorizeSP() {
           console.log('spotify authorize called ...');
           $('.text.loader').html("Authorizing from Spotify app....");
-          let url = "https://accounts.spotify.com/authorize?client_id=03f7870c8b5e433e95b6cab9cdd89d88&response_type=code&redirect_uri=https://myrn.herokuapp.com/sync?type=spotify&scope=user-read-recently-played,user-library-read,playlist-read-private,user-follow-read,user-read-currently-playing,user-top-read";
+          let url = "https://accounts.spotify.com/authorize?client_id=03f7870c8b5e433e95b6cab9cdd89d88&response_type=code&redirect_uri=https://myrn.herokuapp.com/sync?type=spotify&scope=user-read-recently-played,user-library-read,playlist-read-private,user-follow-read,user-read-currently-playing,user-top-read,user-modify-playback-state";
+          //let url = "https://accounts.spotify.com/authorize?client_id=03f7870c8b5e433e95b6cab9cdd89d88&response_type=code&redirect_uri=http://127.0.0.1:4001/sync?type=spotify&scope=user-read-recently-played,user-library-read,playlist-read-private,user-follow-read,user-read-currently-playing,user-top-read,user-modify-playback-state";
           window.open(url, '_self', true);
         }
 
         function getSPToken(obj2) {
           console.log('Getting spotify token!!!');
-          let obj = { client_id: '03f7870c8b5e433e95b6cab9cdd89d88', client_secret : 'c1758e91ae284c4d9983fc0595023b73', redirect_uri:'https://myrn.herokuapp.com/sync?type=spotify'};
+          let url = 'https://myrn.herokuapp.com/sync?type=spotify';
+          //let url = 'http://127.0.0.1:4001/sync?type=spotify';
+
+          let obj = { client_id: '03f7870c8b5e433e95b6cab9cdd89d88', client_secret : 'c1758e91ae284c4d9983fc0595023b73', redirect_uri:url};
           $.extend( obj, obj2 );
           //console.log(JSON.stringify(obj));
           $.ajax({

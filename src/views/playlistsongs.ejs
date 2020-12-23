@@ -32,6 +32,12 @@
       .list .segment{
         margin: .5rem 0 !important;
       }
+
+      .ui.modal, .ui.modal>.actions {
+        background-color: #f2711c87!important;
+        text-align: center !important;
+      }
+      
       
       
     </style>
@@ -40,18 +46,45 @@
       $(document).ready(function () {
         
         $('form button').click(function (e) { 
-            $('.ui.dimmer').dimmer('show');
+            $('.loading').dimmer('show');
         });   
-
 
         if(localStorage.getItem("playListId") != null){
           let playListId = localStorage.getItem("playListId");
           console.log('playlist id is : ', playListId);
-          $('.ui.dimmer').dimmer('show');
-          getSPPlaylistSongs(playListId);
+          $('.loading').dimmer('show');
+          getSPToken(playListId);
 
         }
 
+        function getSPToken(playListId) {
+          console.log('Getting spotify token!!!');
+          let url = 'https://myrn.herokuapp.com/sync?type=spotify';
+          //let url = 'http://127.0.0.1:4001/sync?type=spotify';
+          let token = JSON.parse(localStorage.getItem("sptoken"));
+          let obj = { refresh_token:token.refresh_token, grant_type:'refresh_token', client_id: '03f7870c8b5e433e95b6cab9cdd89d88', client_secret : 'c1758e91ae284c4d9983fc0595023b73', redirect_uri:url};
+          //console.log(JSON.stringify(obj));
+          $.ajax({
+            url: 'https://accounts.spotify.com/api/token',
+            method: 'POST',
+            data: jQuery.param(obj) ,
+            contentType: 'application/x-www-form-urlencoded;',
+          }).done(function (data){
+            data.created_at = new Date();
+            
+            if(! data.hasOwnProperty("refresh_token")){ 
+              let tkn = JSON.parse(localStorage.getItem("sptoken"));
+              data.refresh_token=tkn.refresh_token;
+            }
+
+            localStorage.setItem("sptoken", JSON.stringify(data));
+            //console.log(JSON.stringify(data));
+            getSPPlaylistSongs(playListId);
+            
+          }).fail(function (xhr, status) {
+            console.log(xhr.responseText);
+          });
+        }
 
         function getSPPlaylistSongs(id) {
           console.log('Getting spotify playlist songs!!!');
@@ -69,7 +102,7 @@
             
             data.items.forEach(song => {
 
-              let l = '<a class="item ui raised segment" data="'+song.track.album.external_urls.spotify+'">'+
+              let l = '<a class="item ui raised segment" data="'+song.track.album.id+'">'+
               '<img class="ui tiny image" src="'+song.track.album.images[1].url+'">'+
               '<div class="content">'+
                 '<div class="header">'+song.track.album.name+'</div>'+
@@ -81,48 +114,127 @@
 
             });
 
-            $('.ui.dimmer').dimmer('hide');
+            $('.loading').dimmer('hide');
 
         
           }).fail(function (xhr, status) {
             console.log(xhr.responseText);
-            $('.ui.dimmer').dimmer('hide');
+            $('.loading').dimmer('hide');
           });
         }
 
+        // $(document).on("click", ".trackList a", function(){
+        //   console.log($(this).attr('data'));
+        //   //window.open($(this).attr('data'), '_self');
+        //   let tkn = JSON.parse(localStorage.getItem("sptoken"));
+        //   // window.onSpotifyWebPlaybackSDKReady = () => {
+        //   //   const userAccessToken = tkn.access_token;
+        //   //   const webPlayback = new Spotify.Player({
+        //   //     name: "Spotify Web Playback SDK",
+        //   //     getOAuthToken: callback => { callback(userAccessToken)}
+        //   //   });
+        //   //   webPlayback.connect();
+        //   //};
 
-        $(document).on("click", ".trackList a", function(){
-          console.log($(this).attr('data'));
-          //window.open($(this).attr('data'), '_self');
-          let tkn = JSON.parse(localStorage.getItem("sptoken"));
-          // window.onSpotifyWebPlaybackSDKReady = () => {
-          //   const userAccessToken = tkn.access_token;
-          //   const webPlayback = new Spotify.Player({
-          //     name: "Spotify Web Playback SDK",
-          //     getOAuthToken: callback => { callback(userAccessToken)}
-          //   });
-          //   webPlayback.connect();
-          //};
-
-        });
-        
-        
-
-        
-        
-
+        // });
+   
       });
     </script>
   </head>
-  <body class="pushable">
+  <body class="pushables">
 
-    <!-- <script src="https://sdk.scdn.co/spotify-player.js"></script>
+    <script src="https://sdk.scdn.co/spotify-player.js"></script>
     <script>
       window.onSpotifyWebPlaybackSDKReady = () => {
-        // You can now initialize Spotify.Player and use the SDK
-        console.log('Ready....');
+        
+        var player = new Spotify.Player({
+          name: 'My run player',
+          getOAuthToken: callback => {
+            let tkn = JSON.parse(localStorage.getItem("sptoken"));
+            callback(tkn.access_token);
+          },
+          volume: 0.5
+        });
+
+        // player.connect();
+
+        // player.addListener('ready', ({ device_id }) => {
+        //   console.log('The Web Playback SDK is ready to play music!');
+        //   console.log('Device ID', device_id);
+        // });
+
+
+        const play = ({
+          spotify_uri,
+          playerInstance: {
+            _options: {
+              getOAuthToken,
+              id
+            }
+          }
+        }) => {
+          getOAuthToken(access_token => {
+
+            $.ajax({
+              url: `https://api.spotify.com/v1/me/player/play?device_id=${id}`,
+              method: 'PUT',
+              headers: {
+                'Content-Type': 'application/json',
+                'Authorization': `Bearer ${access_token}`
+              },
+              body: JSON.stringify({ uris: [spotify_uri] }),
+            }).done(function (data){
+              console.log(JSON.stringify(data));
+            }).fail(function (xhr, status) {
+              let error = JSON.parse(xhr.responseText).error;
+              $('.playerErrorModel .content').html(error.message);
+              $('.playerErrorModel').modal('show');
+              
+            });
+
+          });
+        };
+
+        // function name(trackId) {
+        //   console.log('Inside play !!');
+        //   let tkn = JSON.parse(localStorage.getItem("sptoken"));
+        //   const settings = {
+        //     "url": "https://spotifystefan-skliarovv1.p.rapidapi.com/startPlayback",
+        //     "method": "POST",
+        //     "headers": {
+        //       "content-type": "application/x-www-form-urlencoded",
+        //       "x-rapidapi-key": "fa80dbc6e8msh3eca323f9dcae97p115da2jsnc97e2ea58e72",
+        //       "x-rapidapi-host": "Spotifystefan-skliarovV1.p.rapidapi.com"
+        //     },
+        //     "data": {
+        //       "uris": 'spotify:track:'+trackId,
+        //       "accessToken": tkn.access_token
+        //     }
+        //   };
+
+          // $.ajax(settings).done(function (response) {
+          //   console.log(response);
+          // }).fail(function (xhr, status) {
+          //     let error = JSON.parse(xhr.responseText).error;
+          //     $('.playerErrorModel .content').html(error.message);
+          //     $('.playerErrorModel').modal('show');
+              
+          // });
+        //}
+
+        $(document).on("click", ".trackList a", function(){
+          let trackId = $(this).attr('data');
+          console.log('Track id is : ', trackId);
+          //demo track id 5bimKHx8YBRQBsoph5sODo
+          play({
+            playerInstance: player,
+            spotify_uri: 'spotify:track:'+trackId,
+          });
+          //name(trackId);
+        });
+
       };
-      </script> -->
+    </script>
 
     <%- include('home_header', {title: 'PLAYLIST SONGS', path:'music'}); %>
 
@@ -131,9 +243,25 @@
       <div class="ui list trackList">
         
       </div>
+
     </div>
 
-    <div class="ui  inverted dimmer">
+    <div class="ui basic modal playerErrorModel">
+      <div class="ui icon header">
+        <i class="play icon"></i>
+        Player having trouble !!
+      </div>
+      <div class="content">
+        <p></p>
+      </div>
+      <div class="actions">
+        <div class="ui red cancel button" onclick="$('.dimmer.modals').removeClass('visible active').addClass('hidden');">
+          <i class="remove icon"></i> OK
+        </div>
+      </div>
+    </div>
+
+    <div class="ui inverted dimmer loading">
       <!-- active -->
       <div class="ui text loader">Loading</div>
     </div>

@@ -45,10 +45,6 @@
     <script>
       $(document).ready(function () {
         
-        $('form button').click(function (e) { 
-            $('.loading').dimmer('show');
-        });   
-
         if(localStorage.getItem("playListId") != null){
           let playListId = localStorage.getItem("playListId");
           console.log('playlist id is : ', playListId);
@@ -123,21 +119,6 @@
           });
         }
 
-        // $(document).on("click", ".trackList a", function(){
-        //   console.log($(this).attr('data'));
-        //   //window.open($(this).attr('data'), '_self');
-        //   let tkn = JSON.parse(localStorage.getItem("sptoken"));
-        //   // window.onSpotifyWebPlaybackSDKReady = () => {
-        //   //   const userAccessToken = tkn.access_token;
-        //   //   const webPlayback = new Spotify.Player({
-        //   //     name: "Spotify Web Playback SDK",
-        //   //     getOAuthToken: callback => { callback(userAccessToken)}
-        //   //   });
-        //   //   webPlayback.connect();
-        //   //};
-
-        // });
-   
       });
     </script>
   </head>
@@ -156,14 +137,6 @@
           volume: 0.5
         });
 
-        // player.connect();
-
-        // player.addListener('ready', ({ device_id }) => {
-        //   console.log('The Web Playback SDK is ready to play music!');
-        //   console.log('Device ID', device_id);
-        // });
-
-
         const play = ({
           spotify_uri,
           playerInstance: {
@@ -174,7 +147,7 @@
           }
         }) => {
           getOAuthToken(access_token => {
-            console.log(id);
+            
             $.ajax({
               url: `https://api.spotify.com/v1/me/player/play?device_id=${id}`,
               method: 'PUT',
@@ -187,78 +160,54 @@
               console.log(JSON.stringify(data));
             }).fail(function (xhr, status) {
               let error = JSON.parse(xhr.responseText).error;
-              $('.playerErrorModel .content').html(error.message);
-              $('.playerErrorModel').modal('show');
-              errorMsg(error.message);
-              
+              //$('.playerErrorModel .content').html(error.message);
+              //$('.playerErrorModel').modal('show');
+              errorModel('Player having trouble !!', error.message, (type) => {
+                console.log(type, ' clicked !!!');
+              });
             });
 
           });
         };
 
-        const errorMsg = (message) =>{
-
-          if(!$('#errorcon .message').length){
-
-          const t = `<div class="ui error message">
-            <i class="close icon"></i>
-            <div class="header">
-              Error logs
-            </div>
-            <ul class="list">
-              <li>${message}</li>
-            </ul>
-          </div>`;
-
-          $('#errorcon').html(t);
-
-         }else{
-
-          $('#errorcon .message .list').append(`<li>${message}</li>`);
-
-         }
-
-        }
-
-        // function name(trackId) {
-        //   console.log('Inside play !!');
-        //   let tkn = JSON.parse(localStorage.getItem("sptoken"));
-        //   const settings = {
-        //     "url": "https://spotifystefan-skliarovv1.p.rapidapi.com/startPlayback",
-        //     "method": "POST",
-        //     "headers": {
-        //       "content-type": "application/x-www-form-urlencoded",
-        //       "x-rapidapi-key": "fa80dbc6e8msh3eca323f9dcae97p115da2jsnc97e2ea58e72",
-        //       "x-rapidapi-host": "Spotifystefan-skliarovV1.p.rapidapi.com"
-        //     },
-        //     "data": {
-        //       "uris": 'spotify:track:'+trackId,
-        //       "accessToken": tkn.access_token
-        //     }
-        //   };
-
-          // $.ajax(settings).done(function (response) {
-          //   console.log(response);
-          // }).fail(function (xhr, status) {
-          //     let error = JSON.parse(xhr.responseText).error;
-          //     $('.playerErrorModel .content').html(error.message);
-          //     $('.playerErrorModel').modal('show');
-              
-          // });
-        //}
-
         $(document).on("click", ".trackList a", function(){
           let trackId = $(this).attr('data');
           console.log('Track id is : ', trackId);
-          errorMsg('Track id is : '+trackId);
           //demo track id 5bimKHx8YBRQBsoph5sODo
           play({
             playerInstance: player,
             spotify_uri: 'spotify:track:'+trackId,
           });
-          //name(trackId);
         });
 
+        const errorModel = (title, msg, cb) => {
+
+          if(!$('.playerErrorModel').length){
+            //console.log('model added !');
+            const t = `<div class="ui basic modal playerErrorModel">
+              <div class="ui icon header">
+                <i class="play icon"></i>
+                <span></span>
+              </div>
+              <div class="content">
+                <span></span>
+              </div>
+              <div class="actions">
+                <div class="ui red cancel button" onclick="$('.dimmer.modals').removeClass('visible active').addClass('hidden');">
+                  <i class="remove icon"></i> OK
+                </div>
+              </div>
+            </div>`;
+
+            $('body').append(t);
+
+            $(document).on('click', '.playerErrorModel .cancel', ()=>{cb('cancel')});
+          }
+
+          $('.playerErrorModel .header span').html(title);
+          $('.playerErrorModel .content span').html(msg);
+          $('.playerErrorModel').modal('show');
+        }
       };
     </script>
 
@@ -266,28 +215,13 @@
 
     <div class="pusher" style="padding: 10px!important;">
 
-      <div id="errorcon"></div>
-      
       <div class="ui list trackList">
         
       </div>
 
     </div>
 
-    <div class="ui basic modal playerErrorModel">
-      <div class="ui icon header">
-        <i class="play icon"></i>
-        Player having trouble !!
-      </div>
-      <div class="content">
-        <p></p>
-      </div>
-      <div class="actions">
-        <div class="ui red cancel button" onclick="$('.dimmer.modals').removeClass('visible active').addClass('hidden');">
-          <i class="remove icon"></i> OK
-        </div>
-      </div>
-    </div>
+    
 
     <div class="ui inverted dimmer loading">
       <!-- active -->

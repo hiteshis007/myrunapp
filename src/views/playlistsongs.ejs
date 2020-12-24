@@ -174,7 +174,7 @@
           }
         }) => {
           getOAuthToken(access_token => {
-
+            console.log(id);
             $.ajax({
               url: `https://api.spotify.com/v1/me/player/play?device_id=${id}`,
               method: 'PUT',
@@ -189,11 +189,36 @@
               let error = JSON.parse(xhr.responseText).error;
               $('.playerErrorModel .content').html(error.message);
               $('.playerErrorModel').modal('show');
+              errorMsg(error.message);
               
             });
 
           });
         };
+
+        const errorMsg = (message) =>{
+
+          if(!$('#errorcon .message').length){
+
+          const t = `<div class="ui error message">
+            <i class="close icon"></i>
+            <div class="header">
+              Error logs
+            </div>
+            <ul class="list">
+              <li>${message}</li>
+            </ul>
+          </div>`;
+
+          $('#errorcon').html(t);
+
+         }else{
+
+          $('#errorcon .message .list').append(`<li>${message}</li>`);
+
+         }
+
+        }
 
         // function name(trackId) {
         //   console.log('Inside play !!');
@@ -225,6 +250,7 @@
         $(document).on("click", ".trackList a", function(){
           let trackId = $(this).attr('data');
           console.log('Track id is : ', trackId);
+          errorMsg('Track id is : '+trackId);
           //demo track id 5bimKHx8YBRQBsoph5sODo
           play({
             playerInstance: player,
@@ -239,6 +265,8 @@
     <%- include('home_header', {title: 'PLAYLIST SONGS', path:'music'}); %>
 
     <div class="pusher" style="padding: 10px!important;">
+
+      <div id="errorcon"></div>
       
       <div class="ui list trackList">
         
